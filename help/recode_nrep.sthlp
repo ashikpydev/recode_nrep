@@ -5,7 +5,7 @@
 {hline}
 {title:Title}
 
-    {cmd:recode_nrep} — Automatically recode_nrep "Other specify" responses in non-repeat group data
+    {cmd:recode_nrep} — Automatically recode "Other specify" responses in non-repeat group data
 
 {hline}
 {title:Syntax}
@@ -15,7 +15,7 @@
 {hline}
 {title:Description}
 
-    {cmd:recode_nrep} helps clean and recode_nrep open-ended "Other specify" responses 
+    {cmd:recode_nrep} helps clean and recode open-ended "Other specify" responses
     in non-repeat group survey variables, common in SurveyCTO, ODK, Kobo, etc.
 
     - {it:mainvar} is the coded response variable (numeric or string).
@@ -23,13 +23,12 @@
     - {it:othvar} contains the open-ended text responses.
 
     This program:
-    {ul}
-    {li} Automatically detects the "other" code from {it:splitvar}'s name.</li>
-    {li} Finds common text responses (20% or more of cases) in {it:othvar}.</li>
-    {li} Creates new dummy variables with new numeric codes starting at 1001.</li>
-    {li} recode_nreps {it:mainvar} replacing the old "other" code with new codes.</li>
-    {li} Clears recode_nrepd text from {it:othvar} and resets {it:splitvar} where recode_nrepd.</li>
-    {/ul}
+    
+    1. Automatically detects the "other" code from {it:splitvar}'s name.
+    2. Finds common text responses (20% or more of cases) in {it:othvar}.
+    3. Creates new dummy variables with new numeric codes starting at 1001.
+    4. Recodes {it:mainvar} replacing the old "other" code with new codes.
+    5. Clears recoded text from {it:othvar} and resets {it:splitvar} where recoded.
 
     This saves time and improves data cleaning efficiency.
 
