@@ -1,5 +1,5 @@
-cap program drop recode
-program define recode, rclass
+cap program drop recode_nrep
+program define recode_nrep, rclass
     version 17.0
 
     // Require exactly 3 variables
@@ -17,7 +17,7 @@ program define recode, rclass
     foreach v in `mainvar' `splitvar' `othvar' {
         capture confirm variable `v'
         if _rc {
-            display as error "Variable `v' not found. Please see help recode."
+            display as error "Variable `v' not found. Please see help recode_nrep."
             exit 198
         }
     }
@@ -50,7 +50,7 @@ program define recode, rclass
         gen double percent = 100 * count / `total'
         keep if percent >= 20
         if _N == 0 {
-            display as result "No open-ended categories >= 20% frequency. Nothing to recode."
+            display as result "No open-ended categories >= 20% frequency. Nothing to recode_nrep."
             restore
             exit 0
         }
@@ -71,7 +71,7 @@ program define recode, rclass
         }
     }
 
-    // Create new dummy variables and recode mainvar
+    // Create new dummy variables and recode_nrep mainvar
     foreach val of local othlist {
         local ++maxcode
         local newvar = "`mainvar'_`maxcode'"

@@ -1,0 +1,7 @@
+v 1
+d Installation package for recode_nrep
+d Created by Ashikur Rahman
+d Date: 10 Aug 2025
+
+f ado/recode_nrep.ado
+f help/recode_nrep.sthlp

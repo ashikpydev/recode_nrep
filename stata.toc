@@ -1,2 +1,2 @@
 v 1
-p recode Auto-recodes "Other" open-ended responses
+p recode_nrep Auto-recode non repeat "Other" open-ended responses

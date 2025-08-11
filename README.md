@@ -1,6 +1,6 @@
 
 
-# recode: Automated "Other Specify" Recoding
+# recode_nrep: Automated "Other Specify" Recoding
 
 ![Stata 17+](https://img.shields.io/badge/Stata-≥17.0-blue)
 [![Apache License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
@@ -9,14 +9,14 @@ Automate recoding of "Other specify" responses in survey data.
 
 ## Install
 ```stata
-net install recode, from("https://raw.githubusercontent.com/ashikpydev/recode/main/") replace
+net install recode_nrep, from("https://raw.githubusercontent.com/ashikpydev/recode_nrep/main/") replace
 
-help recode
+help recode_nrep
 ```
 
 ## Usage
 ```stata
-recode mainvar splitvar othvar
+recode_nrep mainvar splitvar othvar
 
     mainvar: Primary variable (g1b4)
     splitvar: "Other" dummy (g1b4_97)
@@ -36,7 +36,7 @@ g1b4oth:
 
 Command:
 ```stata
-recode g1b4 g1b4_97 g1b4oth
+recode_nrep g1b4 g1b4_97 g1b4oth
 ```
 
 After:
@@ -59,4 +59,4 @@ g1b4_1002       |   14   6.57%  // he walks
 Apache 2.0 © 2025 Ashiqur Rahman Rony  
 Email: ashiqurrahman.stat@gmail.com
 
-# recode
+# recode_nrep

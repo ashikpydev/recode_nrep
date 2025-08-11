@@ -1,21 +1,21 @@
 {smcl}
 {* *! version 1.0.0 11aug2025}
-{cmd:help recode}
+{cmd:help recode_nrep}
 
 {hline}
 {title:Title}
 
-    {cmd:recode} — Automatically recode "Other specify" responses in non-repeat group data
+    {cmd:recode_nrep} — Automatically recode_nrep "Other specify" responses in non-repeat group data
 
 {hline}
 {title:Syntax}
 
-    {cmd:recode} {it:mainvar} {it:splitvar} {it:othvar}
+    {cmd:recode_nrep} {it:mainvar} {it:splitvar} {it:othvar}
 
 {hline}
 {title:Description}
 
-    {cmd:recode} helps clean and recode open-ended "Other specify" responses 
+    {cmd:recode_nrep} helps clean and recode_nrep open-ended "Other specify" responses 
     in non-repeat group survey variables, common in SurveyCTO, ODK, Kobo, etc.
 
     - {it:mainvar} is the coded response variable (numeric or string).
@@ -27,8 +27,8 @@
     {li} Automatically detects the "other" code from {it:splitvar}'s name.</li>
     {li} Finds common text responses (20% or more of cases) in {it:othvar}.</li>
     {li} Creates new dummy variables with new numeric codes starting at 1001.</li>
-    {li} Recodes {it:mainvar} replacing the old "other" code with new codes.</li>
-    {li} Clears recoded text from {it:othvar} and resets {it:splitvar} where recoded.</li>
+    {li} recode_nreps {it:mainvar} replacing the old "other" code with new codes.</li>
+    {li} Clears recode_nrepd text from {it:othvar} and resets {it:splitvar} where recode_nrepd.</li>
     {/ul}
 
     This saves time and improves data cleaning efficiency.
@@ -47,7 +47,7 @@
     Run:
 
     {codeblock 80}
-    . recode g208 g208_97 g208oth
+    . recode_nrep g208 g208_97 g208oth
     {codeblock}
 
 {hline}
