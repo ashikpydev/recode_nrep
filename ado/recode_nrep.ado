@@ -40,9 +40,9 @@ program define recode_nrep, rclass
         }
         contract `othvar', freq(count)
         gen double percent = 100 * count / `total'
-        keep if percent >= 20
+        keep if percent >= 10
         if _N == 0 {
-            display as result "No open-ended categories >= 20% frequency. Nothing to recode."
+            display as result "No open-ended categories >= 10% frequency. Nothing to recode."
             restore
             exit 0
         }
