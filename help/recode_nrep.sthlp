@@ -25,7 +25,7 @@
     This program:
     
     1. Automatically detects the "other" code from {it:splitvar}'s name.
-    2. Finds common text responses (20% or more of cases) in {it:othvar}.
+    2. Finds common text responses (10% or more of cases) in {it:othvar}.
     3. Creates new dummy variables with new numeric codes starting at 1001.
     4. Recodes {it:mainvar} replacing the old "other" code with new codes.
     5. Clears recoded text from {it:othvar} and resets {it:splitvar} where recoded.
