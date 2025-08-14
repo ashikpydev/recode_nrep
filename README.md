@@ -52,7 +52,7 @@ g1b4_1002       |   14   6.57%  // he walks
 - Creates new variables for frequent responses
 - Starts new codes at 1001
 - Blanks processed text responses
-- Requires ≥20% response frequency
+- Requires ≥ 10% response frequency
 
 ## License
 
