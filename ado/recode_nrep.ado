@@ -1,4 +1,4 @@
-*! version 1.1.1
+*! version 1.1.2
 *! recode_nrep.ado
 *! Author: Ashiqur Rahman
 *! Description: Recode open-ended "other" responses into new or existing codes
@@ -73,15 +73,15 @@ program define recode_nrep, rclass
     * --- Loop over open-ended responses ---
     foreach val of local othlist {
 
-        * Step A: check if `val` matches any existing dummy label
+        * Step A: check if `val` matches any existing dummy label (numeric-suffix only)
         local matchcode ""
         local matchvar ""
         foreach v of local varsuffixes {
-            local vlab : variable label `v'
-            if trim("`vlab'") == trim("`val'") {
-                if regexm("`v'", "`mainvar'_([0-9]+)$") {
+            if regexm("`v'", "`mainvar'_([0-9]+)$") {
+                local vlab : variable label `v'
+                if trim("`vlab'") == trim("`val'") {
                     local matchcode = regexs(1)
-                    local matchvar = "`v'"
+                    local matchvar  = "`v'"
                 }
             }
         }
@@ -93,23 +93,24 @@ program define recode_nrep, rclass
             * Replace in main variable (swap `others_code` with `matchcode`)
             replace `mainvar' = trim( ///
                 subinstr(" " + `mainvar' + " ", " `others_code' ", " `matchcode' ", .) ///
-            ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 & trim(`othvar') == "`val'"
+            ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 ///
+                & trim(`othvar') == trim("`val'")
 
             * Clear the others dummy
-            replace `splitvar' = 0 if trim(`othvar') == "`val'"
+            replace `splitvar' = 0 if trim(`othvar') == trim("`val'")
 
-            * Set the matched dummy to 1
-            replace `matchvar' = 1 if trim(`othvar') == "`val'"
+            * Set the matched dummy to 1  <<< FIX
+            replace `matchvar' = 1 if trim(`othvar') == trim("`val'")
 
             * Zero out any others dummy with same code suffix
             foreach v of local varsuffixes {
                 if regexm("`v'", "`mainvar'_`others_code'$") {
-                    replace `v' = 0 if trim(`othvar') == "`val'"
+                    replace `v' = 0 if trim(`othvar') == trim("`val'")
                 }
             }
 
             * Blank othvar
-            replace `othvar' = "" if trim(`othvar') == "`val'"
+            replace `othvar' = "" if trim(`othvar') == trim("`val'")
 
         }
         else {
@@ -127,7 +128,7 @@ program define recode_nrep, rclass
 
             label var `newvar' "`val'"
 
-            replace `newvar' = 1 if trim(`othvar') == "`val'"
+            replace `newvar' = 1 if trim(`othvar') == trim("`val'")
 
             * Force zero if mainvar is non-empty but this newvar is still missing
             replace `newvar' = 0 if trim(`mainvar') != "" & `newvar' == .
@@ -135,19 +136,20 @@ program define recode_nrep, rclass
             * Place newvar immediately after splitvar
             order `newvar', after(`splitvar')
 
-            replace `splitvar' = 0 if trim(`othvar') == "`val'"
+            replace `splitvar' = 0 if trim(`othvar') == trim("`val'")
 
             foreach v of local varsuffixes {
                 if regexm("`v'", "`mainvar'_`others_code'$") {
-                    replace `v' = 0 if trim(`othvar') == "`val'"
+                    replace `v' = 0 if trim(`othvar') == trim("`val'")
                 }
             }
 
             replace `mainvar' = trim( ///
                 subinstr(" " + `mainvar' + " ", " `others_code' ", " `maxcode' ", .) ///
-            ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 & trim(`othvar') == "`val'"
+            ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 ///
+                & trim(`othvar') == trim("`val'")
 
-            replace `othvar' = "" if trim(`othvar') == "`val'"
+            replace `othvar' = "" if trim(`othvar') == trim("`val'")
 
             display as result "Created `newvar' for value: `val' (code `maxcode')"
         }
