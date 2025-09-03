@@ -1,7 +1,9 @@
-*! version 1.1.2
+*! version 1.3.0
 *! recode_nrep.ado
 *! Author: Ashiqur Rahman
 *! Description: Recode open-ended "other" responses into new or existing codes
+*! Notes: First try merging back into existing codes (all responses),
+*!        then create new codes only for frequent categories (>=10%).
 
 cap program drop recode_nrep
 program define recode_nrep, rclass
@@ -37,7 +39,7 @@ program define recode_nrep, rclass
     local others_code = trim("`others_code'")
     display as result "Detected others code: `others_code'"
 
-    * --- Collect frequent open-ended responses ---
+    * --- Collect ALL non-empty open-ended responses ---
     preserve
         keep if !missing(`othvar') & trim(`othvar') != ""
         local total = _N
@@ -48,14 +50,7 @@ program define recode_nrep, rclass
         }
         contract `othvar', freq(count)
         gen double percent = 100 * count / `total'
-        keep if percent >= 10
-        if _N == 0 {
-            display as result "No open-ended categories >= 10% frequency. Nothing to recode."
-            restore
-            exit 0
-        }
-        list `othvar' count percent, noobs
-        quietly levelsof `othvar', local(othlist)
+        quietly levelsof `othvar', local(all_othlist)
     restore
 
     * --- Find existing dummy variables ---
@@ -70,10 +65,8 @@ program define recode_nrep, rclass
         }
     }
 
-    * --- Loop over open-ended responses ---
-    foreach val of local othlist {
-
-        * Step A: check if `val` matches any existing dummy label (numeric-suffix only)
+    * --- STEP A: Try merging ALL responses into existing codes ---
+    foreach val of local all_othlist {
         local matchcode ""
         local matchvar ""
         foreach v of local varsuffixes {
@@ -87,72 +80,64 @@ program define recode_nrep, rclass
         }
 
         if "`matchcode'" != "" {
-            * --- Case 1: Matched existing split ---
             display as result "Matched `val' to existing code `matchcode'. Re-coding into main variable."
-
-            * Replace in main variable (swap `others_code` with `matchcode`)
             replace `mainvar' = trim( ///
                 subinstr(" " + `mainvar' + " ", " `others_code' ", " `matchcode' ", .) ///
             ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 ///
                 & trim(`othvar') == trim("`val'")
-
-            * Clear the others dummy
             replace `splitvar' = 0 if trim(`othvar') == trim("`val'")
-
-            * Set the matched dummy to 1  <<< FIX
             replace `matchvar' = 1 if trim(`othvar') == trim("`val'")
-
-            * Zero out any others dummy with same code suffix
             foreach v of local varsuffixes {
                 if regexm("`v'", "`mainvar'_`others_code'$") {
                     replace `v' = 0 if trim(`othvar') == trim("`val'")
                 }
             }
-
-            * Blank othvar
             replace `othvar' = "" if trim(`othvar') == trim("`val'")
+        }
+    }
 
+    * --- STEP B: Create new codes only for frequent categories (>=10%) ---
+    preserve
+        keep if !missing(`othvar') & trim(`othvar') != ""
+        local total = _N
+        contract `othvar', freq(count)
+        gen double percent = 100 * count / `total'
+        keep if percent >= 10
+        if _N == 0 {
+            display as result "No frequent categories (>=10%). No new codes created."
+            restore
+            exit 0
+        }
+        list `othvar' count percent, noobs
+        quietly levelsof `othvar', local(freq_othlist)
+    restore
+
+    foreach val of local freq_othlist {
+        local ++maxcode
+        local newvar = "`mainvar'_`maxcode'"
+        capture confirm variable `newvar'
+        if _rc {
+            gen byte `newvar' = .
         }
         else {
-            * --- Case 2: No match → create new code ---
-            local ++maxcode
-            local newvar = "`mainvar'_`maxcode'"
-
-            quietly capture confirm variable `newvar'
-            if _rc {
-                gen byte `newvar' = .
-            }
-            else {
-                replace `newvar' = .
-            }
-
-            label var `newvar' "`val'"
-
-            replace `newvar' = 1 if trim(`othvar') == trim("`val'")
-
-            * Force zero if mainvar is non-empty but this newvar is still missing
-            replace `newvar' = 0 if trim(`mainvar') != "" & `newvar' == .
-
-            * Place newvar immediately after splitvar
-            order `newvar', after(`splitvar')
-
-            replace `splitvar' = 0 if trim(`othvar') == trim("`val'")
-
-            foreach v of local varsuffixes {
-                if regexm("`v'", "`mainvar'_`others_code'$") {
-                    replace `v' = 0 if trim(`othvar') == trim("`val'")
-                }
-            }
-
-            replace `mainvar' = trim( ///
-                subinstr(" " + `mainvar' + " ", " `others_code' ", " `maxcode' ", .) ///
-            ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 ///
-                & trim(`othvar') == trim("`val'")
-
-            replace `othvar' = "" if trim(`othvar') == trim("`val'")
-
-            display as result "Created `newvar' for value: `val' (code `maxcode')"
+            replace `newvar' = .
         }
+        label var `newvar' "`val'"
+        replace `newvar' = 1 if trim(`othvar') == trim("`val'")
+        replace `newvar' = 0 if trim(`mainvar') != "" & `newvar' == .
+        order `newvar', after(`splitvar')
+        replace `splitvar' = 0 if trim(`othvar') == trim("`val'")
+        foreach v of local varsuffixes {
+            if regexm("`v'", "`mainvar'_`others_code'$") {
+                replace `v' = 0 if trim(`othvar') == trim("`val'")
+            }
+        }
+        replace `mainvar' = trim( ///
+            subinstr(" " + `mainvar' + " ", " `others_code' ", " `maxcode' ", .) ///
+        ) if strpos(" " + `mainvar' + " ", " `others_code' ") > 0 ///
+            & trim(`othvar') == trim("`val'")
+        replace `othvar' = "" if trim(`othvar') == trim("`val'")
+        display as result "Created `newvar' for value: `val' (code `maxcode')"
     }
 
     display as result "Done. New codes started at 1001 and up (if any were added)."
