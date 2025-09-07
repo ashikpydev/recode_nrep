@@ -1,4 +1,4 @@
-*! version 1.3.0
+*! version 1.3.1
 *! recode_nrep.ado
 *! Author: Ashiqur Rahman
 *! Description: Recode open-ended "other" responses into new or existing codes
@@ -93,6 +93,18 @@ program define recode_nrep, rclass
                 }
             }
             replace `othvar' = "" if trim(`othvar') == trim("`val'")
+
+            * --- NEW: Remove duplicate codes after merge ---
+            quietly {
+                forvalues i = 1/`=_N' {
+                    local codes = `mainvar'[`i']
+                    local newcodes = ""
+                    foreach c of local codes {
+                        if strpos(" `newcodes' ", " `c' ") == 0 local newcodes "`newcodes' `c'"
+                    }
+                    replace `mainvar' = trim("`newcodes'") in `i'
+                }
+            }
         }
     }
 
